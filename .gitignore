@@ -31,3 +31,13 @@ build/
 yotta_modules/
 yotta_targets/
 .DS_Store
+
+# IDE
+.vscode
+.mbed
+
+# auto modified files
+mbed-os/
+mbed_settings.py
+mbed_settings.pyc
+shields/

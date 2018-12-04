@@ -23,6 +23,25 @@
 DigitalOut  led1(LED1, 1);
 InterruptIn button(BLE_BUTTON_PIN_NAME);
 
+
+////////////// binbeat
+DigitalOut enableDebugPortRX(EN_RS232);
+DigitalOut debugPortForceOff(FORCEOFF_RS232); // uses inverse logic!
+DigitalOut debugPortForceOn(FORCEON_RS232);
+DigitalOut enable3v3(EN_3V3_LOGIC);
+DigitalOut enable5v(EN_5V_LOGIC);
+DigitalOut disableVc(TX_RS232_BATT);
+
+void powerup(void) {
+    enableDebugPortRX = 1;
+    debugPortForceOff = 1;
+    debugPortForceOn = 1;
+    enable3v3 = 1;
+    enable5v = 1;
+    disableVc = 0;
+}
+///
+
 static EventQueue eventQueue(/* event count */ 10 * EVENTS_EVENT_SIZE);
 
 const static char     DEVICE_NAME[] = "Button";
@@ -110,6 +129,8 @@ void scheduleBleEventsProcessing(BLE::OnEventsToProcessCallbackContext* context)
 
 int main()
 {
+    powerup();
+
     eventQueue.call_every(500, blinkCallback);
 
     BLE &ble = BLE::Instance();

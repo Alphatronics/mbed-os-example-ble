@@ -7,6 +7,12 @@
         }
     },
     "target_overrides": {
+        "*": {
+            "platform.stdio-baud-rate": 115200,
+            "platform.default-serial-baud-rate": 115200,
+            "platform.stdio-convert-newlines": true,
+            "mbed-trace.enable": false
+        },
         "NRF51_DK": {
             "ble_button_pin_name": "BUTTON1"
         },
@@ -30,6 +36,22 @@
             "target.features_add": ["BLE"],
             "target.extra_labels_add": ["CORDIO", "CORDIO_BLUENRG"],
             "ble_button_pin_name": "USER_BUTTON"
+        },
+        "NUCLEO_F429ZI": {
+            "target.features_add": ["BLE"],
+            "target.extra_labels_add": ["CORDIO", "CORDIO_BLUENRG"],
+            "ble_button_pin_name": "USER_BUTTON"
+        },
+        "MODULE_BINBEAT_V1": {
+            "ble_button_pin_name": "USER_BUTTON",
+            "target.macros_add": [
+                "BLUENRG_PIN_SPI_MOSI=MOSI_FRONT",
+                "BLUENRG_PIN_SPI_MISO=MISO_FRONT",
+                "BLUENRG_PIN_SPI_nCS=CS_BLE",
+                "BLUENRG_PIN_SPI_RESET=RST_BLE",
+                "BLUENRG_PIN_SPI_IRQ=IRQ_BLE",
+                "BLUENRG_PIN_SPI_SCK=SCLK_FRONT"
+            ]
         }
     }
 }
