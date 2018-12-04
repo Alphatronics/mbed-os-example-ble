@@ -20,8 +20,8 @@
 #include "ble/Gap.h"
 #include "ButtonService.h"
 
-DigitalOut  led1(LED1, 1);
-InterruptIn button(BLE_BUTTON_PIN_NAME);
+
+InterruptIn button(PA_0); //BLE_BUTTON_PIN_NAME
 
 
 ////////////// binbeat
@@ -36,9 +36,11 @@ void powerup(void) {
     enableDebugPortRX = 1;
     debugPortForceOff = 1;
     debugPortForceOn = 1;
+    disableVc = 0;
     enable3v3 = 1;
     enable5v = 1;
-    disableVc = 0;
+    wait_ms(100);
+    printf("Board ready\r\n");
 }
 ///
 
@@ -61,17 +63,14 @@ void buttonReleasedCallback(void)
 
 void disconnectionCallback(const Gap::DisconnectionCallbackParams_t *params)
 {
+    printf("disconnected, restarting advertising...\r\n");
     BLE::Instance().gap().startAdvertising(); // restart advertising
-}
-
-void blinkCallback(void)
-{
-    led1 = !led1; /* Do blinky on LED1 to indicate system aliveness. */
 }
 
 void onBleInitError(BLE &ble, ble_error_t error)
 {
     /* Initialization error handling should go here */
+    printf("onBleInitError %d: %s\r\n", (uint8_t)error, BLE::errorToString(error));
 }
 
 void printMacAddress()
@@ -100,15 +99,17 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params)
 
     /* Ensure that it is the default instance of BLE */
     if(ble.getInstanceID() != BLE::DEFAULT_INSTANCE) {
+        printf("BLE instance not default instance!\r\n");
         return;
     }
 
     ble.gap().onDisconnection(disconnectionCallback);
 
-    button.fall(buttonPressedCallback);
-    button.rise(buttonReleasedCallback);
+    button.fall(buttonReleasedCallback);
+    button.rise(buttonPressedCallback);
 
     /* Setup primary service. */
+    //buttonServicePtr = new ButtonTestService();
     buttonServicePtr = new ButtonService(ble, false /* initial value for button pressed */);
 
     /* setup advertising */
@@ -130,8 +131,6 @@ void scheduleBleEventsProcessing(BLE::OnEventsToProcessCallbackContext* context)
 int main()
 {
     powerup();
-
-    eventQueue.call_every(500, blinkCallback);
 
     BLE &ble = BLE::Instance();
     ble.onEventsToProcess(scheduleBleEventsProcessing);

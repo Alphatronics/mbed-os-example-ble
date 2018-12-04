@@ -17,6 +17,19 @@
 #ifndef __BLE_BUTTON_SERVICE_H__
 #define __BLE_BUTTON_SERVICE_H__
 
+class ButtonTestService {
+public:
+    ButtonTestService()
+    {
+    }
+
+    void updateButtonState(bool newState) {
+        printf("btn state changed: %d\r\n", (int)newState);
+    }
+
+private:
+};
+
 class ButtonService {
 public:
     const static uint16_t BUTTON_SERVICE_UUID              = 0xA000;
@@ -31,6 +44,7 @@ public:
     }
 
     void updateButtonState(bool newState) {
+        printf("btn state changed: %d\r\n", (int)newState);
         ble.gattServer().write(buttonState.getValueHandle(), (uint8_t *)&newState, sizeof(bool));
     }
 

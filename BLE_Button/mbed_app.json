@@ -10,8 +10,7 @@
         "*": {
             "platform.stdio-baud-rate": 115200,
             "platform.default-serial-baud-rate": 115200,
-            "platform.stdio-convert-newlines": true,
-            "mbed-trace.enable": false
+            "platform.stdio-convert-newlines": true
         },
         "NRF51_DK": {
             "ble_button_pin_name": "BUTTON1"
