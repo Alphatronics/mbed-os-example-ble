@@ -67,6 +67,11 @@ void disconnectionCallback(const Gap::DisconnectionCallbackParams_t *params)
     BLE::Instance().gap().startAdvertising(); // restart advertising
 }
 
+void connectionCallback(const Gap::ConnectionCallbackParams_t *params)
+{
+    printf("connected...\r\n");
+}
+
 void onBleInitError(BLE &ble, ble_error_t error)
 {
     /* Initialization error handling should go here */
@@ -104,6 +109,7 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params)
     }
 
     ble.gap().onDisconnection(disconnectionCallback);
+    ble.gap().onConnection(connectionCallback);
 
     button.fall(buttonReleasedCallback);
     button.rise(buttonPressedCallback);
