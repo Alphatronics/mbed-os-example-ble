@@ -40,4 +40,4 @@ yotta_targets/
 mbed-os/
 mbed_settings.py
 mbed_settings.pyc
-shields/
+TARGET_CORDIO_BLUENRG/
