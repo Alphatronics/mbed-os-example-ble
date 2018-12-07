@@ -21,24 +21,18 @@
 #include "ButtonService.h"
 
 
-InterruptIn button(PA_0); //BLE_BUTTON_PIN_NAME
+static InterruptIn button(PA_0); //BLE_BUTTON_PIN_NAME
 
 
 ////////////// binbeat
-DigitalOut enableDebugPortRX(EN_RS232);
-DigitalOut debugPortForceOff(FORCEOFF_RS232); // uses inverse logic!
-DigitalOut debugPortForceOn(FORCEON_RS232);
-DigitalOut enable3v3(EN_3V3_LOGIC);
-DigitalOut enable5v(EN_5V_LOGIC);
-DigitalOut disableVc(TX_RS232_BATT);
+DigitalOut enableDebugPortRX(PB_15, 0); //enable RX on debug port
+DigitalOut debugPortForceOff(PD_10, 1); // uses inverse logic!
+DigitalOut debugPortForceOn(PD_11, 1);
+DigitalOut disableVc(PC_6, 0);  //enable vcontrolled
+DigitalOut enable3v3(PG_1, 1);
+DigitalOut enable5v(PA_1, 1);
 
 void powerup(void) {
-    enableDebugPortRX = 1;
-    debugPortForceOff = 1;
-    debugPortForceOn = 1;
-    disableVc = 0;
-    enable3v3 = 1;
-    enable5v = 1;
     wait_ms(100);
     printf("Board ready\r\n");
 }

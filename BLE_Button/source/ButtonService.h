@@ -17,33 +17,48 @@
 #ifndef __BLE_BUTTON_SERVICE_H__
 #define __BLE_BUTTON_SERVICE_H__
 
-class ButtonTestService {
+class ButtonBaseService {
 public:
-    ButtonTestService()
+
+    virtual void updateButtonState(bool newState) = 0;
+
+protected:
+    ButtonBaseService()
     {
     }
 
-    void updateButtonState(bool newState) {
+private:
+};
+
+class MockButtonService : public ButtonBaseService {
+public:
+    MockButtonService() : ButtonBaseService()
+    {
+    }
+
+    void updateButtonState(bool newState) override {
         printf("btn state changed: %d\r\n", (int)newState);
     }
 
 private:
 };
 
-class ButtonService {
+class ButtonService : public ButtonBaseService {
 public:
     const static uint16_t BUTTON_SERVICE_UUID              = 0xA000;
     const static uint16_t BUTTON_STATE_CHARACTERISTIC_UUID = 0xA001;
 
     ButtonService(BLE &_ble, bool buttonPressedInitial) :
-        ble(_ble), buttonState(BUTTON_STATE_CHARACTERISTIC_UUID, &buttonPressedInitial, GattCharacteristic::BLE_GATT_CHAR_PROPERTIES_NOTIFY)
+        ButtonBaseService(),
+        ble(_ble), 
+        buttonState(BUTTON_STATE_CHARACTERISTIC_UUID, &buttonPressedInitial, GattCharacteristic::BLE_GATT_CHAR_PROPERTIES_NOTIFY)
     {
         GattCharacteristic *charTable[] = {&buttonState};
         GattService         buttonService(ButtonService::BUTTON_SERVICE_UUID, charTable, sizeof(charTable) / sizeof(GattCharacteristic *));
         ble.gattServer().addService(buttonService);
     }
 
-    void updateButtonState(bool newState) {
+    void updateButtonState(bool newState) override {
         printf("btn state changed: %d\r\n", (int)newState);
         ble.gattServer().write(buttonState.getValueHandle(), (uint8_t *)&newState, sizeof(bool));
     }
