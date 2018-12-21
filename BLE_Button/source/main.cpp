@@ -25,12 +25,21 @@ static InterruptIn button(PA_0); //BLE_BUTTON_PIN_NAME
 
 
 ////////////// binbeat
+//#define BINBEAT_V10
+#define BINBEAT_V12
+
 DigitalOut enableDebugPortRX(PB_15, 0); //enable RX on debug port
 DigitalOut debugPortForceOff(PD_10, 1); // uses inverse logic!
 DigitalOut debugPortForceOn(PD_11, 1);
 DigitalOut disableVc(PC_6, 0);  //enable vcontrolled
 DigitalOut enable3v3(PG_1, 1);
+
+#ifdef BINBEAT_V10
+DigitalOut enable5v(PB_1, 1);
+#endif // BINBEAT_V10
+#ifdef BINBEAT_V12
 DigitalOut enable5v(PA_1, 1);
+#endif // BINBEAT_V12
 
 void powerup(void) {
     wait_ms(100);
