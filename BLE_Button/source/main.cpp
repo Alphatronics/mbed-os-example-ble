@@ -33,6 +33,7 @@ DigitalOut debugPortForceOff(PD_10, 1); // uses inverse logic!
 DigitalOut debugPortForceOn(PD_11, 1);
 DigitalOut disableVc(PC_6, 0);  //enable vcontrolled
 DigitalOut enable3v3(PG_1, 1);
+PwmOut buzzer(PF_7);
 
 #ifdef BINBEAT_V10
 DigitalOut enable5v(PB_1, 1);
@@ -45,11 +46,27 @@ void powerup(void) {
     wait_ms(100);
     printf("Board ready\r\n");
 }
+
+void buzzzz()
+{
+    buzzer.period(1/(float)2050); //xx seconds period
+	buzzer = 0.1; //duty cycle, relative to period
+}
+void mute()
+{
+    buzzer = 0;
+}
+void beep()
+{
+    buzzzz();
+    wait_ms(100);
+    mute();
+}
 ///
 
 static EventQueue eventQueue(/* event count */ 10 * EVENTS_EVENT_SIZE);
 
-const static char     DEVICE_NAME[] = "Button";
+const static char     DEVICE_NAME[] = "ButtonGeoff";
 static const uint16_t uuid16_list[] = {ButtonService::BUTTON_SERVICE_UUID};
 
 ButtonService *buttonServicePtr;
@@ -68,11 +85,13 @@ void disconnectionCallback(const Gap::DisconnectionCallbackParams_t *params)
 {
     printf("disconnected, restarting advertising...\r\n");
     BLE::Instance().gap().startAdvertising(); // restart advertising
+    beep();
 }
 
 void connectionCallback(const Gap::ConnectionCallbackParams_t *params)
 {
     printf("connected...\r\n");
+    beep();
 }
 
 void onBleInitError(BLE &ble, ble_error_t error)
@@ -87,7 +106,7 @@ void printMacAddress()
     Gap::AddressType_t addr_type;
     Gap::Address_t address;
     BLE::Instance().gap().getAddress(&addr_type, address);
-    printf("DEVICE MAC ADDRESS: ");
+    printf("SERVICE: %s\r\nDEVICE MAC ADDRESS: ", DEVICE_NAME);
     for (int i = 5; i >= 1; i--){
         printf("%02x:", address[i]);
     }
