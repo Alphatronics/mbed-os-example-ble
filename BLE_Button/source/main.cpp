@@ -33,7 +33,8 @@ DigitalOut debugPortForceOff(PD_10, 1); // uses inverse logic!
 DigitalOut debugPortForceOn(PD_11, 1);
 DigitalOut disableVc(PC_6, 0);  //enable vcontrolled
 DigitalOut enable3v3(PG_1, 1);
-PwmOut buzzer(PF_7);
+PwmOut buzzer(PF_7); //we're using the buzzer as audio feedback whenever a BLE connection is ready or lost
+DigitalOut resetBLE(RST_BLE, 1);
 
 #ifdef BINBEAT_V10
 DigitalOut enable5v(PB_1, 1);
@@ -43,7 +44,10 @@ DigitalOut enable5v(PA_1, 1);
 #endif // BINBEAT_V12
 
 void powerup(void) {
-    wait_ms(100);
+    wait_ms(10);
+    printf("Initializing board\r\n");
+    wait_ms(1000);
+    resetBLE = 0;
     printf("Board ready\r\n");
 }
 
@@ -66,7 +70,7 @@ void beep()
 
 static EventQueue eventQueue(/* event count */ 10 * EVENTS_EVENT_SIZE);
 
-const static char     DEVICE_NAME[] = "ButtonGeoff";
+const static char     DEVICE_NAME[] = "LaunchMissileButton";
 static const uint16_t uuid16_list[] = {ButtonService::BUTTON_SERVICE_UUID};
 
 ButtonService *buttonServicePtr;
@@ -115,6 +119,7 @@ void printMacAddress()
 
 void bleInitComplete(BLE::InitializationCompleteCallbackContext *params)
 {
+    printf("BLE init complete.\r\n");
     BLE&        ble   = params->ble;
     ble_error_t error = params->error;
 
@@ -130,6 +135,9 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params)
         return;
     }
 
+    printMacAddress();
+
+    printf("creating service and service callbacks...\r\n");
     ble.gap().onDisconnection(disconnectionCallback);
     ble.gap().onConnection(connectionCallback);
 
@@ -141,6 +149,7 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params)
     buttonServicePtr = new ButtonService(ble, false /* initial value for button pressed */);
 
     /* setup advertising */
+    printf("starting advertising\r\n");
     ble.gap().accumulateAdvertisingPayload(GapAdvertisingData::BREDR_NOT_SUPPORTED | GapAdvertisingData::LE_GENERAL_DISCOVERABLE);
     ble.gap().accumulateAdvertisingPayload(GapAdvertisingData::COMPLETE_LIST_16BIT_SERVICE_IDS, (uint8_t *)uuid16_list, sizeof(uuid16_list));
     ble.gap().accumulateAdvertisingPayload(GapAdvertisingData::COMPLETE_LOCAL_NAME, (uint8_t *)DEVICE_NAME, sizeof(DEVICE_NAME));
@@ -148,11 +157,12 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params)
     ble.gap().setAdvertisingInterval(1000); /* 1000ms. */
     ble.gap().startAdvertising();
 
-    printMacAddress();
+    printf("ready!!!\r\n");
 }
 
 void scheduleBleEventsProcessing(BLE::OnEventsToProcessCallbackContext* context) {
-    BLE &ble = BLE::Instance();
+    //its a bad idea to printf here
+    BLE& ble = BLE::Instance();
     eventQueue.call(Callback<void()>(&ble, &BLE::processEvents));
 }
 
@@ -160,10 +170,12 @@ int main()
 {
     powerup();
 
-    BLE &ble = BLE::Instance();
+    BLE& ble = BLE::Instance();
+    printf("BLE instance: %d, version %s\r\n", (int)&ble, ble.getVersion());
     ble.onEventsToProcess(scheduleBleEventsProcessing);
     ble.init(bleInitComplete);
 
+    printf("initializing...\r\n");
     eventQueue.dispatch_forever();
 
     return 0;

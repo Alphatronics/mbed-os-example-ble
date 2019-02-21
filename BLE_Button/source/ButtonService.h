@@ -36,7 +36,7 @@ public:
     {
     }
 
-    void updateButtonState(bool newState) override {
+    void updateButtonState(bool newState) /*override => only with -std=c++11*/ {
         printf("btn state changed: %d\r\n", (int)newState);
     }
 
@@ -58,7 +58,7 @@ public:
         ble.gattServer().addService(buttonService);
     }
 
-    void updateButtonState(bool newState) override {
+    void updateButtonState(bool newState) /*override => only with -std=c++11*/ {
         printf("btn state changed: %d\r\n", (int)newState);
         ble.gattServer().write(buttonState.getValueHandle(), (uint8_t *)&newState, sizeof(bool));
     }
